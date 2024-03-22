@@ -62,7 +62,7 @@ code {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 60%;
+  width: 50%;
   border-left: 1px solid #d1dbe3;
   border-right: 1px solid #d1dbe3;
 }
@@ -155,6 +155,6 @@ code {
   background-color: #c6e3fa;
   padding: 0.8em 0.9em;
   border-radius: 0.7em;
-  color: rgba(0,0,0,.87);
+  color: rgba(0, 0, 0, 0.87);
   font-size: 15px;
 }

@@ -6,6 +6,15 @@ const SystemMessage = {
   author: "Bot",
 };
 
+function isJsonString(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
 export function WsChat({ currentUser, onLogout }) {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([SystemMessage]);
@@ -16,36 +25,46 @@ export function WsChat({ currentUser, onLogout }) {
   let ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket(webSocketUrl);
+    if (!ws.current) {
+      ws.current = new WebSocket(webSocketUrl);
 
-    ws.current.onopen = () => {
-      console.log("Socket connected");
-    };
+      ws.current.onopen = () => {
+        console.log("Socket connected");
+      };
 
-    ws.current.onclose = (error) => {
-      console.log("Socket disconnected");
-    };
+      ws.current.onclose = (error) => {
+        console.log("Socket disconnected");
+      };
 
-    ws.current.onerror = (error) => {
-      console.log("connection error " + webSocketUrl);
-      console.log(error);
-    };
+      ws.current.onerror = (error) => {
+        console.log("connection error " + webSocketUrl);
+      };
 
-    ws.current.onmessage = (newMessage) => {
-      const parseMessage = JSON.parse(newMessage.data); // JSON.parse(newMessage.data);
-      // console.log(`${JSON.stringify(newMessage)}`);
-      // console.log(`New message added: ${parseMessage}`);
-      // console.log(parseMessage);
-      // console.log(parseMessage.author);
-      setMessages((previousMessages) => [...previousMessages, parseMessage]);
-    };
+      ws.current.onmessage = (newMessage) => {
+        console.log(newMessage);
+
+        if (newMessage.data === "keepalive") {
+          console.log(newMessage);
+          return;
+        }
+
+        if (isJsonString(newMessage.data)) {
+          const parseMessage = JSON.parse(newMessage.data); // JSON.parse(newMessage.data);
+          // console.log(`${JSON.stringify(newMessage)}`);
+          // console.log(`New message added: ${parseMessage}`);
+          // console.log(parseMessage);
+          // console.log(parseMessage.author);
+          setMessages((previousMessages) => [
+            ...previousMessages,
+            parseMessage,
+          ]);
+        }
+      };
+    }
 
     return () => {
       console.log("clean up");
-      ws.current.onopen = null;
-      ws.current.onclose = null;
-      ws.current.onerror = null;
-      ws.current.onmessage = null;
+      // ws.current.close();
     };
   }, []);
 
